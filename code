@@ -7,7 +7,7 @@ class Node:
         self.center = None
         self.right = None
         
-    def insertChild(self, data):
+    def insertChild(self, data): #logic for entering nodes
         child_type = random.choice(['left', 'center', 'right'])
         if child_type == 'left':
             self.left = Node(data)
@@ -19,34 +19,34 @@ class Node:
             self.right = Node(data)
             return self.right
 
-    @staticmethod
-    def treeRandomizer():
-        values = list(range(10))  # Unique 0 to 9
+    
+    def treeRandomizer(): 
+        values = list(range(10)) #0-9
         random.shuffle(values)
-        value_index = 0
+        value_index = 0 #value index for making every node unique
 
         root = Node(values[value_index])
-        value_index += 1
+        value_index += 1 #adds one to the value index to make sure nodes dont repeat
 
-        l2Nodes = []
-        for _ in range(random.randint(1, 3)):
+        l2Nodes = [] #randomizes the 2nd level of nodes
+        for i in range(random.randint(1, 3)):
             if value_index >= len(values):
                 break
             child = root.insertChild(values[value_index])
             l2Nodes.append(child)
             value_index += 1
 
-        l3Nodes = []
+        l3Nodes = [] #randomizes the 3rd level of nodes
         for parent in l2Nodes:
-            for _ in range(random.randint(1, 3)):
+            for i in range(random.randint(1, 3)):
                 if value_index >= len(values):
                     break
                 child = parent.insertChild(values[value_index])
                 l3Nodes.append(child)
                 value_index += 1
 
-        for parent in l3Nodes:
-            for _ in range(random.randint(1, 3)):
+        for parent in l3Nodes: #randomizes the last layer of nodes
+            for i in range(random.randint(1, 3)):
                 if value_index >= len(values):
                     break
                 parent.insertChild(values[value_index])
@@ -64,6 +64,6 @@ def printTree(node, level=0, prefix="Root: "):
         if node.right:
             printTree(node.right, level+1, "R--- ")
 
-# Example usage
+
 randomTree = Node.treeRandomizer()
 printTree(randomTree)
