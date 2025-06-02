@@ -1,4 +1,3 @@
-BLUE = "\033[94m"
 import random
 
 class Node:
