@@ -1,3 +1,5 @@
+BLUE = "\033[94m"
+RESET = "\033[0m"
 import random
 
 class Node:
@@ -6,64 +8,97 @@ class Node:
         self.left = None
         self.center = None
         self.right = None
+        self.parent = None
         
-    def insertChild(self, data): #logic for entering nodes
+    def insert_child(self, data):
         child_type = random.choice(['left', 'center', 'right'])
         if child_type == 'left':
             self.left = Node(data)
+            self.left.parent = self
             return self.left
         elif child_type == 'center':
             self.center = Node(data)
+            self.center.parent = self
             return self.center
         else:
             self.right = Node(data)
+            self.right.parent = self
             return self.right
 
-    
-    def treeRandomizer(): 
-        values = list(range(10)) #0-9
-        random.shuffle(values)
-        value_index = 0 #value index for making every node unique
+def create_random_tree():
+    values = list(range(10)) #creates a list of randomized numbers 0-9
+    random.shuffle(values)
+    value_index = 0
 
-        root = Node(values[value_index])
-        value_index += 1 #adds one to the value index to make sure nodes dont repeat
+    root = Node(values[value_index])
+    value_index += 1
 
-        l2Nodes = [] #randomizes the 2nd level of nodes
+    level_2_nodes = [] #randomize level 2 nodes
+    for i in range(random.randint(1, 3)):
+        if value_index >= len(values):
+            break
+        child = root.insert_child(values[value_index]) #inserts the child into the value index, making sure it cant be repeated
+        level_2_nodes.append(child)
+        value_index += 1
+
+    level_3_nodes = [] #randomize level 3 nodes
+    for parent in level_2_nodes:
         for i in range(random.randint(1, 3)):
             if value_index >= len(values):
                 break
-            child = root.insertChild(values[value_index])
-            l2Nodes.append(child)
+            child = parent.insert_child(values[value_index]) #inserts the child into the value index, making sure it cant be repeated
+            level_3_nodes.append(child)
             value_index += 1
 
-        l3Nodes = [] #randomizes the 3rd level of nodes
-        for parent in l2Nodes:
-            for i in range(random.randint(1, 3)):
-                if value_index >= len(values):
-                    break
-                child = parent.insertChild(values[value_index])
-                l3Nodes.append(child)
-                value_index += 1
+    leaf_nodes = [] #randomize level 4 nodes
+    for parent in level_3_nodes:
+        has_child = False
+        for i in range(random.randint(1, 3)):
+            if value_index >= len(values):
+                break
+            child = parent.insert_child(values[value_index]) #inserts the child into the value index, making sure it cant be repeated
+            leaf_nodes.append(child)
+            value_index += 1
+            has_child = True
+        if not has_child:
+            leaf_nodes.append(parent)
 
-        for parent in l3Nodes: #randomizes the last layer of nodes
-            for i in range(random.randint(1, 3)):
-                if value_index >= len(values):
-                    break
-                parent.insertChild(values[value_index])
-                value_index += 1
+    return root, leaf_nodes
 
-        return root
+def get_path_to_root(node): #creates a list and appends nodes to it depending on the nodes parent until there is no parent (root)
+    path = [] 
+    while node is not None:
+        path.append(node)
+        node = node.parent
+    return path
 
-def printTree(node, level=0, prefix="Root: "):
+def print_tree(node, level=0, prefix="Root: ", highlight_path=None):
+    if highlight_path is None:
+        highlight_path = set()
+    
     if node is not None:
-        print(" " * (level*4) + prefix + str(node.data))
+        if node in highlight_path: #highlights the node blue if it is in the highlight path
+            print(" " * (level * 4) + BLUE + prefix + str(node.data) + RESET)
+        else:
+            print(" " * (level * 4) + prefix + str(node.data))
+            
         if node.left:
-            printTree(node.left, level+1, "L--- ")
+            print_tree(node.left, level + 1, "L--- ", highlight_path)
         if node.center:
-            printTree(node.center, level+1, "C--- ")
+            print_tree(node.center, level + 1, "C--- ", highlight_path)
         if node.right:
-            printTree(node.right, level+1, "R--- ")
+            print_tree(node.right, level + 1, "R--- ", highlight_path)
+
+#generate tree and get leaf nodes
+random_tree, leaf_nodes = create_random_tree()
+
+#select a random leaf node and get its path to root
+if leaf_nodes:
+    random_leaf = random.choice(leaf_nodes)
+    path_to_root = get_path_to_root(random_leaf)
+    highlight_path = set(path_to_root)
+else:
+    highlight_path = set()
 
 
-randomTree = Node.treeRandomizer()
-printTree(randomTree)
+print_tree(random_tree, highlight_path=highlight_path)
